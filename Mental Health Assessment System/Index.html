@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Psychological Assessment System</title>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Inter", sans-serif; background: #F7F9FC; color: #1F2937; min-height: 100vh; }
+  .container { max-width: 760px; margin: 0 auto; padding: 32px 20px 60px; }
+
+  .hero { background: linear-gradient(135deg,#4A90D9 0%,#6B5EA8 100%); border-radius: 16px; padding: 40px 36px; text-align: center; color: #fff; margin-bottom: 24px; }
+  .hero h1 { font-size: 1.85rem; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 8px; }
+  .hero p  { font-size: 0.97rem; opacity: 0.88; line-height: 1.6; }
+
+  .disclaimer { background: #FFF8E1; border-left: 4px solid #F5A623; border-radius: 8px; padding: 14px 18px; font-size: 0.85rem; color: #7A5C00; line-height: 1.6; margin-bottom: 24px; }
+
+  .card { background: #fff; border-radius: 14px; padding: 28px 32px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #E8EDF3; }
+  .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; color: #111827; }
+  .card-sub   { font-size: 0.8rem; color: #6B7280; margin-bottom: 22px; }
+
+  .steps { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+  .step  { display: flex; align-items: flex-start; gap: 14px; }
+  .step-num { min-width: 32px; height: 32px; background: linear-gradient(135deg,#4A90D9,#6B5EA8); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+  .step-text { font-size: 0.9rem; color: #374151; line-height: 1.6; padding-top: 5px; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 26px; }
+  .tab-btn { flex: 1; padding: 10px; border: 2px solid #E5E7EB; background: #fff; border-radius: 10px; font-size: 0.88rem; font-weight: 500; cursor: default; color: #6B7280; transition: all 0.18s; }
+  .tab-btn.active { border-color: #4A90D9; color: #4A90D9; background: #EFF6FF; font-weight: 600; }
+  .tab-btn.done   { border-color: #34D399; color: #059669; background: #ECFDF5; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .progress-wrap { background: #E5E7EB; border-radius: 99px; height: 6px; margin-bottom: 22px; }
+  .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,#4A90D9,#6B5EA8); transition: width 0.35s ease; }
+
+  .question-block { display: none; }
+  .question-block.active { display: block; }
+
+  .q-counter { font-size: 0.75rem; font-weight: 600; color: #9CA3AF; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .q-text { font-size: 1rem; font-weight: 500; color: #1F2937; margin-bottom: 16px; line-height: 1.55; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+
+  .option-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; border: 1.5px solid #E5E7EB; border-radius: 10px; cursor: pointer; font-size: 0.88rem; color: #374151; transition: all 0.15s; user-select: none; }
+  .option-label:hover { border-color: #93C5FD; background: #F0F7FF; }
+  .option-label.selected { border-color: #4A90D9; background: #EFF6FF; color: #1D4ED8; font-weight: 500; }
+  .option-label.highlighted { border-color: #EF4444 !important; background: #FEF2F2 !important; animation: shake 0.3s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+  .option-text { flex: 1; line-height: 1.45; }
+  .option-circle { min-width: 28px; height: 28px; border: 2px solid #D1D5DB; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 0.78rem; font-weight: 700; color: #9CA3AF; }
+  .option-label.selected .option-circle { background: #4A90D9; border-color: #4A90D9; color: #fff; }
+  .option-label input[type="radio"] { display: none; }
+
+  .q-alert { display: none; background: #FEF2F2; border-left: 3px solid #EF4444; border-radius: 6px; padding: 9px 13px; font-size: 0.82rem; color: #991B1B; margin-top: 10px; }
+
+  .q-nav { display: flex; gap: 10px; margin-top: 20px; }
+  .btn { flex: 1; padding: 13px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.88; }
+  .btn-primary { background: linear-gradient(135deg,#4A90D9,#6B5EA8); color: #fff; }
+  .btn-outline  { background: #fff; border: 2px solid #D1D5DB; color: #374151; flex: 0 0 auto; padding: 13px 20px; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .result-grid { display: flex; gap: 14px; flex-wrap: wrap; margin: 18px 0; }
+  .result-card { flex: 1; min-width: 160px; border-radius: 12px; padding: 22px 16px; text-align: center; color: #fff; }
+  .result-card .r-cat  { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.85; margin-bottom: 8px; }
+  .result-card .r-sev  { font-size: 1.25rem; font-weight: 700; }
+  .result-card .r-conf { font-size: 0.75rem; opacity: 0.8; margin-top: 5px; }
+  .bg-normal   { background: linear-gradient(135deg,#34D399,#059669); }
+  .bg-mild     { background: linear-gradient(135deg,#FCD34D,#D97706); }
+  .bg-moderate { background: linear-gradient(135deg,#FB923C,#EA580C); }
+  .bg-severe   { background: linear-gradient(135deg,#F87171,#DC2626); }
+  .bg-ext      { background: linear-gradient(135deg,#C084FC,#7C3AED); }
+
+  .advice-box { background: #F0F7FF; border-radius: 10px; padding: 16px 20px; font-size: 0.875rem; color: #1E3A5F; line-height: 1.7; margin-top: 10px; }
+  .advice-box b { color: #1D4ED8; }
+
+  .loader { display: none; text-align: center; padding: 30px; font-size: 0.9rem; color: #6B7280; }
+  .spinner { width: 36px; height: 36px; border: 4px solid #E5E7EB; border-top-color: #4A90D9; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .nav-row { display: flex; gap: 12px; margin-top: 10px; }
+
+  @media (max-width: 480px) { .hero h1 { font-size: 1.4rem; } .card { padding: 20px 18px; } .result-grid { flex-direction: column; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- PAGE 1: HOME -->
+  <div class="page active" id="page-home">
+    <div class="hero">
+      <h1>Psychological Assessment System</h1>
+      <p>A research-based self-report tool to evaluate your<br>
+         <strong>Stress &middot; Anxiety &middot; Depression</strong> levels</p>
+    </div>
+    <div class="disclaimer">
+      <strong>Important Disclaimer:</strong> This tool is for <strong>informational and educational purposes only</strong>.
+      It does <strong>not</strong> provide a clinical diagnosis. Always consult a qualified mental health professional for medical advice, diagnosis, or treatment.
+    </div>
+    <div class="card">
+      <div class="card-title">How it works</div>
+      <div class="card-sub">Three quick sections &middot; Takes about 5 minutes</div>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Stress</strong> &mdash; 8 questions about tension and difficulty relaxing.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Anxiety</strong> &mdash; 8 questions about physical and mental anxiety symptoms.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Depression</strong> &mdash; 8 questions about mood, motivation and self-worth.</div></div>
+      </div>
+      <p style="font-size:0.85rem;color:#6B7280;margin-top:18px;line-height:1.6;">
+        Select the option out of 4 that best describes how much each statement applied to you <strong>over the past week</strong>.
+      </p>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('page-assessment')">Start Assessment</button>
+  </div>
+
+  <!-- PAGE 2: ASSESSMENT -->
+  <div class="page" id="page-assessment">
+    <div style="text-align:center;margin-bottom:18px;">
+      <h2 style="font-size:1.25rem;font-weight:700;">Complete the Assessment</h2>
+      <p style="font-size:0.83rem;color:#6B7280;margin-top:4px;">Select the option out of 4 that best describes your experience <strong>over the past week</strong></p>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="progress-bar" style="width:4%"></div></div>
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-btn-0">Stress</button>
+      <button class="tab-btn"        id="tab-btn-1">Anxiety</button>
+      <button class="tab-btn"        id="tab-btn-2">Depression</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-0">
+      <div class="card">
+        <div class="card-title">Stress</div>
+        <div class="card-sub">Select the option out of 4 for each statement</div>
+        <div id="stress-questions"></div>
+        <div class="q-nav">
+          <button class="btn btn-outline" id="stress-prev" onclick="qPrev('stress')">Back</button>
+          <button class="btn btn-primary" id="stress-next" onclick="qNext('stress')">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-1">
+      <div class="card">
+        <div class="card-title">Anxiety</div>
+        <div class="card-sub">Select the option out of 4 for each statement</div>
+        <div id="anxiety-questions"></div>
+        <div class="q-nav">
+          <button class="btn btn-outline" id="anxiety-prev" onclick="qPrev('anxiety')">Previous</button>
+          <button class="btn btn-primary" id="anxiety-next" onclick="qNext('anxiety')">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-2">
+      <div class="card">
+        <div class="card-title">Depression</div>
+        <div class="card-sub">Select the option out of 4 for each statement</div>
+        <div id="depression-questions"></div>
+        <div class="q-nav">
+          <button class="btn btn-outline" id="depression-prev" onclick="qPrev('depression')">Previous</button>
+          <button class="btn btn-primary" id="depression-next" onclick="qNext('depression')">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: RESULTS -->
+  <div class="page" id="page-results">
+    <div class="hero" style="padding:28px 36px;margin-bottom:20px;">
+      <h1 style="font-size:1.5rem;">Your Assessment Results</h1>
+      <p>Based on your responses over the past week</p>
+    </div>
+    <div class="loader" id="loader"><div class="spinner"></div>Analyzing your responses...</div>
+    <div id="result-content" style="display:none;">
+      <div class="result-grid" id="result-grid"></div>
+      <div class="card" style="margin-top:10px;">
+        <div class="card-title">Recommendation</div>
+        <div class="advice-box" id="advice-box"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">About this Assessment</div>
+        <div class="card-sub">Trained on standardized dataset &middot; Top-8 features per category</div>
+        <p style="font-size:0.85rem;color:#374151;line-height:1.9;">
+          <strong>Stress:</strong> Evaluated using the top 8 most influential questions from the stress subscale.<br>
+          <strong>Anxiety:</strong> Evaluated using the top 8 most influential questions from the anxiety subscale.<br>
+          <strong>Depression:</strong> Evaluated using the top 8 most influential questions from the depression subscale.
+        </p>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-outline" onclick="retake()">Retake Assessment</button>
+        <button class="btn btn-primary" onclick="goTo('page-home')">Back to Home</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const QUESTIONS = {
+  stress: [
+    {key:"Q11_S",text:"I found myself getting upset rather easily."},
+    {key:"Q1_S", text:"I found it hard to wind down."},
+    {key:"Q27_S",text:"I was unable to relax."},
+    {key:"Q29_S",text:"I found myself getting upset quite easily."},
+    {key:"Q8_S", text:"I tended to over-react to situations."},
+    {key:"Q39_S",text:"I found it difficult to relax."},
+    {key:"Q12_S",text:"I felt that I was using a lot of nervous energy."},
+    {key:"Q33_S",text:"I found it hard to calm down after something upset me."},
+  ],
+  anxiety: [
+    {key:"Q28_A",text:"I was aware of dryness of my mouth."},
+    {key:"Q36_A",text:"I felt scared without any good reason."},
+    {key:"Q9_A", text:"I was worried about situations in which I might panic."},
+    {key:"Q7_A", text:"I experienced trembling (e.g., in the hands)."},
+    {key:"Q20_A",text:"I felt I was close to panic."},
+    {key:"Q40_A",text:"I felt terrified."},
+    {key:"Q41_A",text:"I was worried about situations in which I might embarrass myself."},
+    {key:"Q4_A", text:"I experienced breathing difficulty (e.g., fast breathing)."},
+  ],
+  depression: [
+    {key:"Q13_D",text:"I felt sad and depressed."},
+    {key:"Q34_D",text:"I was unable to become enthusiastic about anything."},
+    {key:"Q16_D",text:"I felt I had lost interest in just about everything."},
+    {key:"Q17_D",text:"I felt I wasn't worth much as a person."},
+    {key:"Q21_D",text:"I felt that life was meaningless."},
+    {key:"Q10_D",text:"I felt that I had nothing to look forward to."},
+    {key:"Q26_D",text:"I felt down-hearted and blue."},
+    {key:"Q24_D",text:"I couldn't seem to experience any positive feeling at all."},
+  ]
+};
+
+const OPTIONS = [
+  "Did not apply to me at all",
+  "Applied to me to some degree",
+  "Applied to me a considerable amount",
+  "Applied to me very much or most of the time"
+];
+const LETTERS  = ["a","b","c","d"];
+const SECTIONS = ["stress","anxiety","depression"];
+const currentQ = {stress:0, anxiety:0, depression:0};
+let currentTab = 0;
+
+function totalAnswered() {
+  let n = 0;
+  SECTIONS.forEach(s => QUESTIONS[s].forEach(q => { if (document.querySelector(`input[name="${q.key}"]:checked`)) n++; }));
+  return n;
+}
+function updateProgress() {
+  document.getElementById("progress-bar").style.width = Math.round(totalAnswered()/24*100)+"%";
+}
+
+// Render all questions hidden, first one shown
+function renderQuestions(sec) {
+  const c = document.getElementById(sec+"-questions");
+  c.innerHTML = QUESTIONS[sec].map((q,qi) => `
+    <div class="question-block${qi===0?" active":""}" id="qblock-${q.key}">
+      <div class="q-counter">Question ${qi+1} of ${QUESTIONS[sec].length}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options">
+        ${OPTIONS.map((opt,oi) => `
+          <label class="option-label" id="lbl-${q.key}-${oi}" onclick="pickOption('${q.key}',${oi},'${sec}',${qi})">
+            <input type="radio" name="${q.key}" value="${oi}">
+            <span class="option-circle">${LETTERS[oi]}</span>
+            <span class="option-text">${opt}</span>
+          </label>
+        `).join("")}
+      </div>
+      <div class="q-alert" id="alert-${q.key}">Please select an option before continuing.</div>
+    </div>
+  `).join("");
+}
+SECTIONS.forEach(s => renderQuestions(s));
+
+function pickOption(key, val, sec, qi) {
+  document.querySelector(`input[name="${key}"][value="${val}"]`).checked = true;
+  for (let i=0;i<4;i++) {
+    const l = document.getElementById(`lbl-${key}-${i}`);
+    if(l){ l.classList.toggle("selected", i===val); l.classList.remove("highlighted"); }
+  }
+  document.getElementById(`alert-${key}`).style.display = "none";
+  updateProgress();
+  updateNavBtn(sec, qi);
+}
+
+function showQ(sec, idx) {
+  QUESTIONS[sec].forEach((q,i) => {
+    document.getElementById(`qblock-${q.key}`).classList.toggle("active", i===idx);
+  });
+  currentQ[sec] = idx;
+  updateNavBtn(sec, idx);
+}
+
+function updateNavBtn(sec, idx) {
+  const isLast = idx === QUESTIONS[sec].length-1;
+  const nxt = document.getElementById(sec+"-next");
+  const prv = document.getElementById(sec+"-prev");
+  if (sec==="stress") {
+    nxt.textContent = isLast ? "Continue to Anxiety" : "Next";
+    prv.textContent = idx===0 ? "Back to Home" : "Previous";
+  } else if (sec==="anxiety") {
+    nxt.textContent = isLast ? "Continue to Depression" : "Next";
+    prv.textContent = "Previous";
+  } else {
+    nxt.textContent = isLast ? "Submit" : "Next";
+    prv.textContent = "Previous";
+  }
+}
+
+function qPrev(sec) {
+  const idx = currentQ[sec];
+  if (idx > 0) { showQ(sec, idx-1); return; }
+  if (sec==="stress")     { goTo("page-home"); }
+  else if (sec==="anxiety")  { switchTab(0); showQ("stress", QUESTIONS.stress.length-1); }
+  else                        { switchTab(1); showQ("anxiety", QUESTIONS.anxiety.length-1); }
+}
+
+function qNext(sec) {
+  const idx = currentQ[sec];
+  const q   = QUESTIONS[sec][idx];
+  if (!document.querySelector(`input[name="${q.key}"]:checked`)) {
+    document.getElementById(`alert-${q.key}`).style.display = "block";
+    for(let i=0;i<4;i++){
+      const l=document.getElementById(`lbl-${q.key}-${i}`);
+      if(l) l.classList.add("highlighted");
+    }
+    window.scrollTo({top:0,behavior:"smooth"});
+    return;
+  }
+  const isLast = idx === QUESTIONS[sec].length-1;
+  if (!isLast) { showQ(sec, idx+1); return; }
+  if (sec==="stress")    { switchTab(1); showQ("anxiety",0); }
+  else if (sec==="anxiety") { switchTab(2); showQ("depression",0); }
+  else                      { submitAssessment(); }
+}
+
+function switchTab(idx) {
+  document.querySelectorAll(".tab-panel").forEach((p,i) => p.classList.toggle("active", i===idx));
+  document.querySelectorAll(".tab-btn").forEach((b,i) => {
+    b.classList.remove("active","done");
+    if(i===idx) b.classList.add("active");
+    else if(i<idx) b.classList.add("done");
+  });
+  currentTab = idx;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function goTo(pageId) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function retake() {
+  document.querySelectorAll("input[type=radio]").forEach(r => r.checked=false);
+  document.querySelectorAll(".option-label").forEach(l => l.classList.remove("selected","highlighted"));
+  document.querySelectorAll(".q-alert").forEach(a => a.style.display="none");
+  SECTIONS.forEach(s => { currentQ[s]=0; showQ(s,0); updateNavBtn(s,0); });
+  switchTab(0);
+  document.getElementById("result-content").style.display="none";
+  document.getElementById("loader").style.display="none";
+  goTo("page-assessment");
+}
+
+function severityClass(label) {
+  const l = label.toLowerCase();
+  if(l.includes("normal"))    return "bg-normal";
+  if(l.includes("mild"))      return "bg-mild";
+  if(l.includes("moderate"))  return "bg-moderate";
+  if(l.includes("extremely")) return "bg-ext";
+  if(l.includes("severe"))    return "bg-severe";
+  return "bg-mild";
+}
+
+function getAdvice(s,a,d) {
+  const all=[s,a,d].map(x=>x.toLowerCase());
+  if(all.every(x=>x.includes("normal")))
+    return "<b>You're doing well!</b> All three dimensions fall within the normal range. Keep maintaining healthy habits — regular sleep, exercise, and social connection go a long way.";
+  if(all.some(x=>x==="severe"||x==="extremely severe"))
+    return "<b>Please seek professional support.</b> One or more dimensions show a high severity level. Reach out to a licensed mental health professional or counsellor as soon as possible. You don't have to navigate this alone.";
+  return "<b>Consider speaking to someone.</b> Mild or moderate symptoms are present. Talking to a trusted friend, family member, or counsellor can be very helpful. Self-care practices like mindfulness, exercise, and adequate sleep are also beneficial.";
+}
+
+async function submitAssessment() {
+  const payload = {};
+  SECTIONS.forEach(s => QUESTIONS[s].forEach(q => {
+    const c = document.querySelector(`input[name="${q.key}"]:checked`);
+    payload[q.key] = c ? parseInt(c.value) : 0;
+  }));
+  goTo("page-results");
+  document.getElementById("loader").style.display="block";
+  document.getElementById("result-content").style.display="none";
+  try {
+    const res = await fetch("/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!res.ok) throw new Error("Server error: "+res.status);
+    showResults(await res.json());
+  } catch(err) {
+    document.getElementById("loader").style.display="none";
+    document.getElementById("result-content").innerHTML=`<div class="card" style="text-align:center;"><p style="font-size:1rem;font-weight:600;color:#DC2626;">Something went wrong</p><p style="font-size:0.85rem;margin-top:8px;color:#6B7280;">${err.message}</p><button class="btn btn-outline" style="margin-top:16px;max-width:200px;" onclick="retake()">Try Again</button></div>`;
+    document.getElementById("result-content").style.display="block";
+  }
+}
+
+function showResults(data) {
+  document.getElementById("loader").style.display="none";
+  const cats=[{name:"Stress",...data.stress},{name:"Anxiety",...data.anxiety},{name:"Depression",...data.depression}];
+  document.getElementById("result-grid").innerHTML=cats.map(c=>`
+    <div class="result-card ${severityClass(c.label)}">
+      <div class="r-cat">${c.name}</div>
+      <div class="r-sev">${c.label}</div>
+      <div class="r-conf">Confidence: ${c.confidence}%</div>
+    </div>`).join("");
+  document.getElementById("advice-box").innerHTML=getAdvice(data.stress.label,data.anxiety.label,data.depression.label);
+  document.getElementById("result-content").style.display="block";
+}
+
+SECTIONS.forEach(s => updateNavBtn(s,0));
+</script>
+</body>
+</html>
