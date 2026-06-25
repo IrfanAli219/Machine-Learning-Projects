@@ -94,8 +94,9 @@ def predict(data: AssessmentInput):
 # ─────────────────────────────────────────────
 # SERVE FRONTEND
 # ─────────────────────────────────────────────
-app.mount("/static", StaticFiles(directory=BASE), name="static")
-
 @app.get("/")
 def root():
-    return FileResponse(os.path.join(BASE, "index.html"))
+    return {
+        "status": "running",
+        "message": "MindCheck AI API is live"
+    }
