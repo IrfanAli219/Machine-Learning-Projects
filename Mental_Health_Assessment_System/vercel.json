@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "Mental Health Assessment System/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "Mental Health Assessment System/main.py"
+    }
+  ]
+}
